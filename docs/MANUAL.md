@@ -11,7 +11,7 @@
 ## Deploy Script (deploy.sh)
 
 The `deploy.sh` script is the recommended way to deploy applications. It wraps `provision.sh` with:
-- Docker CE pre-installed (Hetzner App image)
+- Ubuntu 24.04 + Docker CE installed via script
 - Hetzner Cloud Firewall (external firewall Docker can't bypass)
 - Auto-detection and execution of docker-compose.yml
 
@@ -33,9 +33,9 @@ The `deploy.sh` script is the recommended way to deploy applications. It wraps `
 1. Validates the directory exists
 2. Detects docker-compose.yml (or compose.yml)
 3. Creates/reuses a Hetzner Cloud Firewall
-4. Creates a server with Docker CE image
+4. Creates an Ubuntu 24.04 server with cloud-init hardening
 5. Copies the directory to `~/directory-name` on the server
-6. Installs docker-compose-plugin
+6. Installs Docker CE and docker-compose-plugin via startup script
 7. Runs `docker compose up -d` if compose file exists
 
 ### Configuration
@@ -99,15 +99,16 @@ apt-get install -y nginx
 Set `HC_COPY_SRC` to a local path to copy into the server user's home directory.
 - Uses `rsync` if available, otherwise falls back to `scp`.
 
-## ClouDNS CNAME (Optional)
-Set these in `.env` to create a CNAME record via the ClouDNS API:
-- `CLOUDNS_AUTH_PASSWORD`
+## ClouDNS DNS Records (Optional)
+Set these in `.env` to create DNS records via the ClouDNS API:
+- `CLOUDNS_AUTH_ID` (required - your ClouDNS API user ID)
+- `CLOUDNS_AUTH_PASSWORD` (required - your ClouDNS API password)
 - `CLOUDNS_DOMAIN` (zone, e.g. `example.com`)
 - `CLOUDNS_CNAME_HOST` (record host, e.g. `app`)
-- `CLOUDNS_CNAME_TARGET` (target, e.g. `my-app.example.net`)
-- `CLOUDNS_TTL` (default `3600`)
+- `CLOUDNS_CNAME_TARGET` (target for CNAME, e.g. `my-app.example.net`)
+- `CLOUDNS_TTL` (default `3600`, use `60` for quick updates)
 
-This is required if you want to create SSL using a DNS-based workflow that expects the CNAME in place.
+Note: For A records pointing to the server IP, you'll need to create them manually or extend the script.
 
 ## Required Inputs
 - `.env` with `HC_KEY`

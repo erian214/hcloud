@@ -21,7 +21,7 @@ cp .env.example .env
 ```
 
 This will:
-- Create a server with Docker CE pre-installed
+- Create an Ubuntu 24.04 server and install Docker CE
 - Set up Hetzner Cloud Firewall (ports 22, 80, 443)
 - Copy your directory to the server
 - Run `docker compose up -d` if docker-compose.yml exists
@@ -54,7 +54,7 @@ Key options:
 - `HC_ALLOWED_PORTS`: Comma-separated TCP ports to allow in UFW (default `22`).
 - `HC_COPY_SRC`: Local path to copy to the server (optional).
 - `HC_STARTUP_SCRIPT`: Local script to run on the server after copy.
-- `CLOUDNS_*`: Optional ClouDNS CNAME record settings (auth password only).
+- `CLOUDNS_*`: Optional ClouDNS DNS record settings (requires `CLOUDNS_AUTH_ID` and `CLOUDNS_AUTH_PASSWORD`).
 
 ## Files
 - `deploy.sh`: One-command deploy with Docker CE + Cloud Firewall.
@@ -76,6 +76,7 @@ Key options:
 - Non-root sudo user with SSH key auth
 
 ## Notes
-- `deploy.sh` uses the `docker-ce` Hetzner App image (Docker pre-installed).
+- `deploy.sh` uses Ubuntu 24.04 and installs Docker CE via script (more reliable than Hetzner App images).
 - `provision.sh` defaults to Ubuntu 24.04. Adjust `HC_IMAGE` if needed.
 - Ports are applied to UFW at first boot via cloud-init.
+- For HTTPS, use Caddy in your docker-compose.yml (see `demo/` for example).
