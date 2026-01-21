@@ -58,9 +58,22 @@ Key options:
 
 ## Files
 - `deploy.sh`: One-command deploy with Docker CE + Cloud Firewall.
+- `manage.sh`: Server management (list, stop, start, delete, ssh).
 - `scripts/provision.sh`: Low-level provisioner (env-driven).
 - `scripts/startup.sh`: User-editable post-provision script.
 - `docs/MANUAL.md`: Full operational guide.
+
+## Server Management
+
+```bash
+./manage.sh list                 # List all servers
+./manage.sh stop <name>          # Power off a server
+./manage.sh start <name>         # Power on a server
+./manage.sh delete <name>        # Delete permanently (asks confirmation)
+./manage.sh ssh <name>           # SSH into server
+./manage.sh status <name>        # Get server info
+./manage.sh ip <name>            # Get server IP
+```
 
 ## Security
 
