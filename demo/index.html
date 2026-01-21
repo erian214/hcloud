@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevLab Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #e94560, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid #e94560;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            color: #e94560;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffd93d;
+        }
+
+        .game-description {
+            color: #b0b0b0;
+            margin-bottom: 1.5rem;
+        }
+
+        #game-box {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            background: #e94560;
+            user-select: none;
+        }
+
+        #game-box:hover {
+            transform: scale(1.02);
+        }
+
+        #game-box.waiting {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+        }
+
+        #game-box.ready {
+            background: linear-gradient(135deg, #00b894, #55efc4);
+        }
+
+        #game-box.clicked {
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd93d;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            margin-top: 0.3rem;
+        }
+
+        .leaderboard {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .leaderboard h3 {
+            color: #ffd93d;
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+        }
+
+        .leaderboard-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+        }
+
+        .leaderboard-list li:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            color: #e94560;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #606060;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .server-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .server-info div {
+            padding: 0.2rem 0;
+        }
+
+        .server-info span {
+            color: #55efc4;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .stats {
+                gap: 1rem;
+            }
+            .stat {
+                min-width: 100px;
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hello, World!</h1>
+            <p class="subtitle">Welcome to the DevLab Demo Server</p>
+            <span class="badge">Deployed with Hetzner Cloud</span>
+        </header>
+
+        <div class="game-container">
+            <h2 class="game-title">Reaction Time Challenge</h2>
+            <p class="game-description">Wait for green, then click as fast as you can!</p>
+
+            <div id="game-box" class="waiting">Click to Start</div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="last-time">--</div>
+                    <div class="stat-label">Last (ms)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="best-time">--</div>
+                    <div class="stat-label">Best (ms)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="attempts">0</div>
+                    <div class="stat-label">Attempts</div>
+                </div>
+            </div>
+
+            <div class="leaderboard">
+                <h3>Your Top 5 Times</h3>
+                <ul class="leaderboard-list" id="leaderboard">
+                    <li><span class="rank">-</span> No attempts yet</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by Docker + Nginx on Hetzner Cloud</p>
+            <div class="server-info">
+                <div><span>Domain:</span> demo.devlab.one</div>
+                <div><span>Stack:</span> Docker CE + Nginx Alpine</div>
+                <div><span>Firewall:</span> Hetzner Cloud Firewall</div>
+                <div><span>Deployed:</span> <span id="deploy-time"></span></div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const gameBox = document.getElementById('game-box');
+        const lastTimeEl = document.getElementById('last-time');
+        const bestTimeEl = document.getElementById('best-time');
+        const attemptsEl = document.getElementById('attempts');
+        const leaderboardEl = document.getElementById('leaderboard');
+        const deployTimeEl = document.getElementById('deploy-time');
+
+        let state = 'idle'; // idle, waiting, ready
+        let startTime = 0;
+        let timeout = null;
+        let attempts = 0;
+        let bestTime = Infinity;
+        let times = [];
+
+        // Set deploy time
+        deployTimeEl.textContent = new Date().toLocaleString();
+
+        function updateLeaderboard() {
+            if (times.length === 0) {
+                leaderboardEl.innerHTML = '<li><span class="rank">-</span> No attempts yet</li>';
+                return;
+            }
+
+            const sorted = [...times].sort((a, b) => a - b).slice(0, 5);
+            leaderboardEl.innerHTML = sorted.map((time, i) =>
+                `<li><span class="rank">#${i + 1}</span> ${time}ms</li>`
+            ).join('');
+        }
+
+        function startGame() {
+            state = 'waiting';
+            gameBox.className = 'waiting';
+            gameBox.textContent = 'Wait for green...';
+
+            const delay = Math.random() * 3000 + 1500; // 1.5-4.5 seconds
+            timeout = setTimeout(() => {
+                state = 'ready';
+                gameBox.className = 'ready';
+                gameBox.textContent = 'CLICK NOW!';
+                startTime = Date.now();
+            }, delay);
+        }
+
+        function handleClick() {
+            if (state === 'idle') {
+                startGame();
+            } else if (state === 'waiting') {
+                // Clicked too early!
+                clearTimeout(timeout);
+                state = 'idle';
+                gameBox.className = 'clicked';
+                gameBox.textContent = 'Too early! Click to try again';
+            } else if (state === 'ready') {
+                const reactionTime = Date.now() - startTime;
+                state = 'idle';
+                attempts++;
+                times.push(reactionTime);
+
+                gameBox.className = 'clicked';
+                gameBox.textContent = `${reactionTime}ms! Click to play again`;
+
+                lastTimeEl.textContent = reactionTime;
+                attemptsEl.textContent = attempts;
+
+                if (reactionTime < bestTime) {
+                    bestTime = reactionTime;
+                    bestTimeEl.textContent = reactionTime;
+                }
+
+                updateLeaderboard();
+
+                // Save to localStorage
+                localStorage.setItem('reactionTimes', JSON.stringify(times));
+                localStorage.setItem('bestTime', bestTime);
+            }
+        }
+
+        // Load saved data
+        const savedTimes = localStorage.getItem('reactionTimes');
+        const savedBest = localStorage.getItem('bestTime');
+        if (savedTimes) {
+            times = JSON.parse(savedTimes);
+            attempts = times.length;
+            attemptsEl.textContent = attempts;
+            updateLeaderboard();
+        }
+        if (savedBest) {
+            bestTime = parseInt(savedBest);
+            bestTimeEl.textContent = bestTime;
+        }
+
+        gameBox.addEventListener('click', handleClick);
+    </script>
+</body>
+</html>
