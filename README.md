@@ -66,13 +66,14 @@ Key options:
 ## Server Management
 
 ```bash
-./manage.sh list                 # List all servers
-./manage.sh stop <name>          # Power off a server
-./manage.sh start <name>         # Power on a server
-./manage.sh delete <name>        # Delete permanently (asks confirmation)
-./manage.sh ssh <name>           # SSH into server
-./manage.sh status <name>        # Get server info
-./manage.sh ip <name>            # Get server IP
+./manage.sh list                           # List all servers
+./manage.sh stop <name>                    # Power off a server
+./manage.sh start <name>                   # Power on a server
+./manage.sh delete <name>                  # Delete permanently
+./manage.sh ssh <name>                     # SSH into server
+./manage.sh status <name>                  # Get server info
+./manage.sh sync <name> ./local-dir        # Upload/sync to server
+./manage.sh download <name> ~/remote ./local  # Download from server
 ```
 
 ## Security

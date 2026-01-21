@@ -17,22 +17,26 @@ fi
 HC_API="https://api.hetzner.cloud/v1"
 
 usage() {
-  echo "Usage: manage.sh <command> [server-name|server-id]"
+  echo "Usage: manage.sh <command> [args...]"
   echo ""
   echo "Commands:"
-  echo "  list                 List all servers"
-  echo "  stop <name|id>       Stop (power off) a server"
-  echo "  start <name|id>      Start (power on) a server"
-  echo "  delete <name|id>     Delete a server permanently"
-  echo "  ssh <name|id>        SSH into a server"
-  echo "  ip <name|id>         Get server IP address"
-  echo "  status <name|id>     Get server status"
+  echo "  list                          List all servers"
+  echo "  stop <name|id>                Stop (power off) a server"
+  echo "  start <name|id>               Start (power on) a server"
+  echo "  delete <name|id>              Delete a server permanently"
+  echo "  ssh <name|id>                 SSH into a server"
+  echo "  ip <name|id>                  Get server IP address"
+  echo "  status <name|id>              Get server status"
+  echo "  sync <name|id> <local-dir>    Upload/sync local dir to server"
+  echo "  download <name|id> <remote> <local>  Download from server"
   echo ""
   echo "Examples:"
   echo "  manage.sh list"
   echo "  manage.sh stop demo-devlab"
   echo "  manage.sh delete 118007214"
   echo "  manage.sh ssh demo-devlab"
+  echo "  manage.sh sync demo-devlab ./my-app      # Upload to ~/my-app"
+  echo "  manage.sh download demo-devlab ~/app ./backup  # Download ~/app to ./backup"
   exit 1
 }
 
@@ -180,6 +184,58 @@ cmd_status() {
   get_server_info "$server_id" | jq -r '.server | "Name: \(.name)\nStatus: \(.status)\nIP: \(.public_net.ipv4.ip)\nType: \(.server_type.name)\nImage: \(.image.name)\nCreated: \(.created)"'
 }
 
+cmd_sync() {
+  local name_or_id="$1"
+  local local_dir="$2"
+  local server_id
+  server_id=$(get_server_id "$name_or_id") || exit 1
+
+  if [[ ! -d "$local_dir" ]]; then
+    echo "Error: Directory not found: $local_dir" >&2
+    exit 1
+  fi
+
+  local server_ip
+  server_ip=$(get_server_info "$server_id" | jq -r '.server.public_net.ipv4.ip')
+
+  local user="${HC_USER:-ops}"
+  local dir_name
+  dir_name=$(basename "$local_dir")
+
+  echo "Syncing '$local_dir' to $user@$server_ip:~/$dir_name..."
+
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=accept-new" "$local_dir/" "$user@$server_ip:~/$dir_name/"
+  else
+    scp -r -o StrictHostKeyChecking=accept-new "$local_dir" "$user@$server_ip:~/"
+  fi
+
+  echo "Done."
+}
+
+cmd_download() {
+  local name_or_id="$1"
+  local remote_path="$2"
+  local local_path="$3"
+  local server_id
+  server_id=$(get_server_id "$name_or_id") || exit 1
+
+  local server_ip
+  server_ip=$(get_server_info "$server_id" | jq -r '.server.public_net.ipv4.ip')
+
+  local user="${HC_USER:-ops}"
+
+  echo "Downloading $user@$server_ip:$remote_path to $local_path..."
+
+  if command -v rsync >/dev/null 2>&1; then
+    rsync -avz -e "ssh -o StrictHostKeyChecking=accept-new" "$user@$server_ip:$remote_path" "$local_path"
+  else
+    scp -r -o StrictHostKeyChecking=accept-new "$user@$server_ip:$remote_path" "$local_path"
+  fi
+
+  echo "Done."
+}
+
 # Main
 require_var HC_KEY
 
@@ -217,6 +273,14 @@ case "$COMMAND" in
   status|info)
     [[ $# -lt 1 ]] && usage
     cmd_status "$1"
+    ;;
+  sync|upload|push)
+    [[ $# -lt 2 ]] && usage
+    cmd_sync "$1" "$2"
+    ;;
+  download|pull)
+    [[ $# -lt 3 ]] && usage
+    cmd_download "$1" "$2" "$3"
     ;;
   *)
     echo "Unknown command: $COMMAND"
